@@ -54,14 +54,7 @@ public class PanoramaImageView extends ImageView {
             mCurrentOffsetX = -mCurrentOffsetX;
         }
 
-        // Restrict it from exceeding the bounds
-        if (mCurrentOffsetX < -mMaxOffsetX) {
-            mCurrentOffsetX = -mMaxOffsetX;
-        } else if (mCurrentOffsetX > mMaxOffsetX) {
-            mCurrentOffsetX = mMaxOffsetX;
-        } else {
-            invalidate();
-        }
+        invalidate();
     }
 
     @Override
