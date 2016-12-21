@@ -32,6 +32,8 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     private int mWidth;
     private int mHeight;
 
+    private float mMaxOffsetX;
+
     public PanoramaImageView(Context context) {
         this(context, null);
     }
@@ -115,6 +117,9 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
 
         mDrawableWidth = getDrawable().getIntrinsicWidth();
         mDrawableHeight = getDrawable().getIntrinsicHeight();
+
+        float imgScale = (float) mHeight / (float) mDrawableHeight;
+        mMaxOffsetX = Math.abs((mDrawableWidth * imgScale - mWidth) * 0.5f);
     }
 
     @Override
@@ -125,21 +130,23 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
         }
 
         if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
-            float imgScale = (float) mHeight / (float) mDrawableHeight;
-            float max_dx = Math.abs((mDrawableWidth * imgScale - mWidth) * 0.5f);
-            float translateX = (float) (-6 * max_dx / Math.PI * mTotalRotateY);
-
-            //  Restrict it from exceeding the bounds
-            if (translateX < -max_dx) {
-                translateX = -max_dx;
-            } else if (translateX > max_dx) {
-                translateX = max_dx;
-            }
-
-            canvas.translate(translateX, 0);
+            canvas.translate(getTranslateX(), 0);
         }
 
         super.onDraw(canvas);
+    }
+
+    private float getTranslateX() {
+        float translateX = (float) (-6 * mMaxOffsetX / Math.PI * mTotalRotateY);
+
+        //  Restrict it from exceeding the bounds
+        if (translateX < -mMaxOffsetX) {
+            translateX = -mMaxOffsetX;
+        } else if (translateX > mMaxOffsetX) {
+            translateX = mMaxOffsetX;
+        }
+
+        return translateX;
     }
 
     public void setEnablePanoramaMode(boolean enable) {
