@@ -25,6 +25,13 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     private long mLastTimestamp = 0; // The time in nanosecond when last sensor event happened.
     private float mTotalRotateY = 0; //
 
+    // Image's width and height
+    private int mDrawableWidth;
+    private int mDrawableHeight;
+    // View's width and height
+    private int mWidth;
+    private int mHeight;
+
     public PanoramaImageView(Context context) {
         this(context, null);
     }
@@ -100,26 +107,30 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        mWidth = getWidth() - getPaddingLeft() - getPaddingRight();
+        mHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+
+        mDrawableWidth = getDrawable().getIntrinsicWidth();
+        mDrawableHeight = getDrawable().getIntrinsicHeight();
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         if (!mEnablePanoramaMode || getDrawable() == null) {
             super.onDraw(canvas);
             return;
         }
 
-        // image's width and height
-        int iWidth = getDrawable().getIntrinsicWidth();
-        int iHeight = getDrawable().getIntrinsicHeight();
-        if (iWidth <= 0 || iHeight <= 0) {
+        if (mDrawableWidth <= 0 || mDrawableHeight <= 0) {
             return;
         }
 
-        // view's width and height
-        int vWidth = getWidth() - getPaddingLeft() - getPaddingRight();
-        int vHeight = getHeight() - getPaddingTop() - getPaddingBottom();
-
-        if (iWidth * vHeight > iHeight * vWidth) {
-            float imgScale = (float) vHeight / (float) iHeight;
-            float max_dx = Math.abs((iWidth * imgScale - vWidth) * 0.5f);
+        if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
+            float imgScale = (float) mHeight / (float) mDrawableHeight;
+            float max_dx = Math.abs((mDrawableWidth * imgScale - mWidth) * 0.5f);
             float translateX = (float) (-6 * max_dx / Math.PI * mTotalRotateY);
 
             //  Restrict it from exceeding the bounds
