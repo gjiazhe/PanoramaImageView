@@ -80,6 +80,9 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (!mEnablePanoramaMode) {
+            return;
+        }
         if (mLastTimestamp == 0) {
             mLastTimestamp = event.timestamp;
             return;
@@ -89,13 +92,14 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
         float rotateY = Math.abs(event.values[1]);
         float rotateZ = Math.abs(event.values[2]);
 
-        if (rotateY > rotateX && rotateY > rotateZ) {
+        if (rotateY > rotateX + rotateZ) {
             final float dT = (event.timestamp - mLastTimestamp) * NS2S;
             mTotalRotateY += event.values[1] * dT;
-            if (mTotalRotateY < -Math.PI || mTotalRotateY > Math.PI) {
-                mTotalRotateY = (float) (mTotalRotateY - (int)((mTotalRotateY + Math.PI) / 2 / Math.PI) * 2 * Math.PI);
-            }
-            if (mTotalRotateY >= -Math.PI/6 && mTotalRotateY <= Math.PI/6) {
+            if (mTotalRotateY > Math.PI/6) {
+                mTotalRotateY = (float) (Math.PI/6);
+            } else if (mTotalRotateY < -Math.PI/6) {
+                mTotalRotateY = (float) (-Math.PI/6);
+            } else {
                 invalidate();
             }
         }
