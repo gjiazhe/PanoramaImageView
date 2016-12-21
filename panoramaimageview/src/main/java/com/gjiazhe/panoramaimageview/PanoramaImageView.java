@@ -2,39 +2,20 @@ package com.gjiazhe.panoramaimageview;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.ImageView;
 
 /**
  * Created by gjz on 19/12/2016.
  */
 
-public class PanoramaImageView extends ImageView implements SensorEventListener {
+public class PanoramaImageView extends ImageView {
 
     // Enable panorama effect or not
     private boolean mEnablePanoramaMode = true;
 
     // If true, the image scroll left when the device clockwise rotate along y-axis.
     private boolean mInvertScroll = true;
-
-    // The maximum radian that the device can rotate clockwise and anticlockwise along y-axis.
-    // The value must between 0 and π/2.
-    private double mMaxRotateRadian = Math.PI/9;
-
-    private SensorManager mSensorManager;
-    private Sensor mSensor;
-
-    // For translate nanosecond to second.
-    private static final float NS2S = 1.0f / 1000000000.0f;
-    // The time in nanosecond when last sensor event happened.
-    private long mLastTimestamp = 0;
-    // The radian the device already rotate along y-axis.
-    private float mTotalRotateY = 0;
 
     // Image's width and height
     private int mDrawableWidth;
@@ -43,7 +24,9 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     private int mWidth;
     private int mHeight;
 
+    // image's offset along x-axis from initial state(center in the view).
     private float mMaxOffsetX;
+    private float mCurrentOffsetX;
 
     public PanoramaImageView(Context context) {
         this(context, null);
@@ -56,71 +39,29 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     public PanoramaImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        initSensorManager();
-
         super.setScaleType(ScaleType.CENTER_CROP);
     }
 
-    private void initSensorManager() {
-        mSensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-
-        if (mSensorManager == null || mSensor == null) {
-            initSensorManager();
-        }
-        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
-        Log.d("register", "register");
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-
-        if (mSensorManager != null) {
-            mSensorManager.unregisterListener(this);
-            mSensorManager = null;
-            mSensor = null;
-            Log.d("unregister", "unregister");
+    public void setGyroscopeObserver(GyroscopeObserver observer) {
+        if (observer != null) {
+            observer.addPanoramaImageView(this);
         }
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (!mEnablePanoramaMode) {
-            return;
-        }
-        if (mLastTimestamp == 0) {
-            mLastTimestamp = event.timestamp;
-            return;
+    void onGyroscopeObserverNotify(double progress) {
+        mCurrentOffsetX = (float) (mMaxOffsetX * progress);
+        if (mInvertScroll) {
+            mCurrentOffsetX = -mCurrentOffsetX;
         }
 
-        float rotateX = Math.abs(event.values[0]);
-        float rotateY = Math.abs(event.values[1]);
-        float rotateZ = Math.abs(event.values[2]);
-
-        if (rotateY > rotateX + rotateZ) {
-            final float dT = (event.timestamp - mLastTimestamp) * NS2S;
-            mTotalRotateY += event.values[1] * dT;
-            if (mTotalRotateY > mMaxRotateRadian) {
-                mTotalRotateY = (float) (mMaxRotateRadian);
-            } else if (mTotalRotateY < -mMaxRotateRadian) {
-                mTotalRotateY = (float) (-mMaxRotateRadian);
-            } else {
-                invalidate();
-            }
+        // Restrict it from exceeding the bounds
+        if (mCurrentOffsetX < -mMaxOffsetX) {
+            mCurrentOffsetX = -mMaxOffsetX;
+        } else if (mCurrentOffsetX > mMaxOffsetX) {
+            mCurrentOffsetX = mMaxOffsetX;
+        } else {
+            invalidate();
         }
-
-        mLastTimestamp = event.timestamp;
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
 
     @Override
@@ -139,61 +80,26 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!mEnablePanoramaMode || getDrawable() == null || mDrawableWidth <= 0 || mDrawableHeight <= 0) {
-            super.onDraw(canvas);
-            return;
-        }
-
-        if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
-            canvas.translate(getTranslateX(), 0);
+        if (mEnablePanoramaMode) {
+            if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
+                canvas.translate(mCurrentOffsetX, 0);
+            }
         }
 
         super.onDraw(canvas);
-    }
-
-    private float getTranslateX() {
-        float translateX = (float) (mMaxOffsetX * mTotalRotateY / mMaxRotateRadian);
-        if (mInvertScroll) {
-            translateX = -translateX;
-        }
-
-        //  Restrict it from exceeding the bounds
-        if (translateX < -mMaxOffsetX) {
-            translateX = -mMaxOffsetX;
-        } else if (translateX > mMaxOffsetX) {
-            translateX = mMaxOffsetX;
-        }
-
-        return translateX;
-    }
-
-    public void setEnablePanoramaMode(boolean enable) {
-        if (mEnablePanoramaMode != enable) {
-            mEnablePanoramaMode = enable;
-            mLastTimestamp = 0;
-            if (enable) {
-                initSensorManager();
-                mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
-            } else if (mSensorManager != null) {
-                mSensorManager.unregisterListener(this);
-                mSensorManager = null;
-                mSensor = null;
-            }
-        }
     }
 
     public boolean isPanoramaModeEnabled() {
         return mEnablePanoramaMode;
     }
 
-    public void setInvertRotation(boolean invert) {
+    public void setInvertScroll(boolean invert) {
         if (mInvertScroll != invert) {
             mInvertScroll = invert;
-            mTotalRotateY = -mTotalRotateY;
         }
     }
 
-    public boolean isInvertRotation() {
+    public boolean isInvertScroll() {
         return mInvertScroll;
     }
 
