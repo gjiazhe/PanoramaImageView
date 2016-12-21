@@ -16,14 +16,21 @@ import android.widget.ImageView;
 
 public class PanoramaImageView extends ImageView implements SensorEventListener {
 
+    // Enable panorama effect or not
     private boolean mEnablePanoramaMode = true;
+
+    // If true, the image scroll left when the device clockwise rotate along y-axis.
+    private boolean mInvertScroll = true;
 
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
-    private static final float NS2S = 1.0f / 1000000000.0f; // For translate nanosecond to second.
-    private long mLastTimestamp = 0; // The time in nanosecond when last sensor event happened.
-    private float mTotalRotateY = 0; //
+    // For translate nanosecond to second.
+    private static final float NS2S = 1.0f / 1000000000.0f;
+    // The time in nanosecond when last sensor event happened.
+    private long mLastTimestamp = 0;
+    // The radian the device already rotate along y-axis.
+    private float mTotalRotateY = 0;
 
     // Image's width and height
     private int mDrawableWidth;
@@ -141,7 +148,10 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     }
 
     private float getTranslateX() {
-        float translateX = (float) (-6 * mMaxOffsetX / Math.PI * mTotalRotateY);
+        float translateX = (float) (6 * mMaxOffsetX / Math.PI * mTotalRotateY);
+        if (mInvertScroll) {
+            translateX = -translateX;
+        }
 
         //  Restrict it from exceeding the bounds
         if (translateX < -mMaxOffsetX) {
@@ -166,6 +176,21 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
                 mSensor = null;
             }
         }
+    }
+
+    public boolean isPanoramaModeEnabled() {
+        return mEnablePanoramaMode;
+    }
+
+    public void setInvertRotation(boolean invert) {
+        if (mInvertScroll != invert) {
+            mInvertScroll = invert;
+            mTotalRotateY = -mTotalRotateY;
+        }
+    }
+
+    public boolean isInvertRotation() {
+        return mInvertScroll;
     }
 
     @Override
