@@ -22,6 +22,10 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     // If true, the image scroll left when the device clockwise rotate along y-axis.
     private boolean mInvertScroll = true;
 
+    // The maximum radian that the device can rotate clockwise and anticlockwise along y-axis.
+    // The value must between 0 and π/2.
+    private double mMaxRotateRadian = Math.PI/9;
+
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
@@ -102,10 +106,10 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
         if (rotateY > rotateX + rotateZ) {
             final float dT = (event.timestamp - mLastTimestamp) * NS2S;
             mTotalRotateY += event.values[1] * dT;
-            if (mTotalRotateY > Math.PI/6) {
-                mTotalRotateY = (float) (Math.PI/6);
-            } else if (mTotalRotateY < -Math.PI/6) {
-                mTotalRotateY = (float) (-Math.PI/6);
+            if (mTotalRotateY > mMaxRotateRadian) {
+                mTotalRotateY = (float) (mMaxRotateRadian);
+            } else if (mTotalRotateY < -mMaxRotateRadian) {
+                mTotalRotateY = (float) (-mMaxRotateRadian);
             } else {
                 invalidate();
             }
@@ -148,7 +152,7 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
     }
 
     private float getTranslateX() {
-        float translateX = (float) (6 * mMaxOffsetX / Math.PI * mTotalRotateY);
+        float translateX = (float) (mMaxOffsetX * mTotalRotateY / mMaxRotateRadian);
         if (mInvertScroll) {
             translateX = -translateX;
         }
