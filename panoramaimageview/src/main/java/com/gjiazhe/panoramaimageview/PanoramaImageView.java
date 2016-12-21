@@ -119,12 +119,8 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (!mEnablePanoramaMode || getDrawable() == null) {
+        if (!mEnablePanoramaMode || getDrawable() == null || mDrawableWidth <= 0 || mDrawableHeight <= 0) {
             super.onDraw(canvas);
-            return;
-        }
-
-        if (mDrawableWidth <= 0 || mDrawableHeight <= 0) {
             return;
         }
 
