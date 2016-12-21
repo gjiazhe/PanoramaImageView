@@ -47,7 +47,7 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
 
         initSensorManager();
 
-        setScaleType(ScaleType.CENTER_CROP);
+        super.setScaleType(ScaleType.CENTER_CROP);
     }
 
     private void initSensorManager() {
@@ -162,5 +162,13 @@ public class PanoramaImageView extends ImageView implements SensorEventListener 
                 mSensor = null;
             }
         }
+    }
+
+    @Override
+    public void setScaleType(ScaleType scaleType) {
+        /**
+         * Do nothing because PanoramaImageView only
+         * supports {@link scaleType.CENTER_CROP}
+         */
     }
 }
