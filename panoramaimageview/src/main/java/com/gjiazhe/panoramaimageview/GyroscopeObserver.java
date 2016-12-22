@@ -76,7 +76,7 @@ public class GyroscopeObserver implements SensorEventListener {
             } else {
                 for (PanoramaImageView view: mViews) {
                     if (view != null) {
-                        view.onGyroscopeObserverNotify(mRotateRadianY / mMaxRotateRadian);
+                        view.updateProgress((float) (mRotateRadianY / mMaxRotateRadian));
                     }
                 }
             }
