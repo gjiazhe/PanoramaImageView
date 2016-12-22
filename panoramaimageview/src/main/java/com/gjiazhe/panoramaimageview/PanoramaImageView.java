@@ -2,11 +2,11 @@ package com.gjiazhe.panoramaimageview;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
@@ -23,10 +23,10 @@ public class PanoramaImageView extends ImageView {
     private byte mOrientation = ORIENTATION_NONE;
 
     // Enable panorama effect or not
-    private boolean mEnablePanoramaMode = true;
+    private boolean mEnablePanoramaMode;
 
     // If true, the image scroll left(top) when the device clockwise rotate along y-axis(x-axis).
-    private boolean mInvertScrollDirection = true;
+    private boolean mInvertScrollDirection;
 
     // Image's width and height
     private int mDrawableWidth;
@@ -43,7 +43,7 @@ public class PanoramaImageView extends ImageView {
     private float mProgress;
 
     // Show scroll bar or not
-    private boolean mEnableScrollbar = true;
+    private boolean mEnableScrollbar;
 
     // The paint to draw scrollbar
     private Paint mScrollbarPaint;
@@ -61,8 +61,13 @@ public class PanoramaImageView extends ImageView {
 
     public PanoramaImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
         super.setScaleType(ScaleType.CENTER_CROP);
+
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.PanoramaImageView);
+        mEnablePanoramaMode = typedArray.getBoolean(R.styleable.PanoramaImageView_piv_enablePanoramaMode, true);
+        mInvertScrollDirection = typedArray.getBoolean(R.styleable.PanoramaImageView_piv_invertScrollDirection, false);
+        mEnableScrollbar = typedArray.getBoolean(R.styleable.PanoramaImageView_piv_show_scrollbar, true);
+        typedArray.recycle();
 
         if (mEnableScrollbar) {
             initScrollbarPaint();
@@ -88,7 +93,6 @@ public class PanoramaImageView extends ImageView {
             if (mOnPanoramaScrollListener != null) {
                 mOnPanoramaScrollListener.onScrolled(this, -mProgress);
             }
-            Log.d("pro", progress+"");
         }
     }
 
