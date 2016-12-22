@@ -100,8 +100,8 @@ public class PanoramaImageView extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        mWidth = getWidth() - getPaddingLeft() - getPaddingRight();
-        mHeight = getHeight() - getPaddingTop() - getPaddingBottom();
+        mWidth = MeasureSpec.getSize(widthMeasureSpec) - getPaddingLeft() - getPaddingRight();
+        mHeight = MeasureSpec.getSize(heightMeasureSpec) - getPaddingTop() - getPaddingBottom();
 
         if (getDrawable() != null) {
             mDrawableWidth = getDrawable().getIntrinsicWidth();
@@ -152,7 +152,7 @@ public class PanoramaImageView extends ImageView {
                     float barBgEndX = barBgStartX + barBgWidth;
                     float barStartX = barBgStartX + (barBgWidth - barWidth) / 2 * (1 - mProgress);
                     float barEndX = barStartX + barWidth;
-                    float barY = mHeight * 0.9f;
+                    float barY = mHeight * 0.95f;
 
                     mScrollbarPaint.setAlpha(100);
                     canvas.drawLine(barBgStartX, barY, barBgEndX, barY, mScrollbarPaint);
