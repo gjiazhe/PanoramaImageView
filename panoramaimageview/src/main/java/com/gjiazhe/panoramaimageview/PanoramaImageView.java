@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -33,7 +32,7 @@ public class PanoramaImageView extends ImageView {
     // Image's offset along x-axis from initial state(center in the view).
     private float mMaxOffsetX;
 
-    // The scroll progress, form -1 to 1.
+    // The scroll progress.
     private float mProgress;
 
     // Show scroll bar or not
@@ -41,6 +40,9 @@ public class PanoramaImageView extends ImageView {
 
     // The paint to draw scrollbar
     private Paint mScrollbarPaint;
+
+    // Observe scroll state
+    private OnPanoramaScrollListener mOnPanoramaScrollListener;
 
     public PanoramaImageView(Context context) {
         this(context, null);
@@ -74,8 +76,11 @@ public class PanoramaImageView extends ImageView {
 
     void updateProgress(float progress) {
         if (mEnablePanoramaMode) {
-            mProgress = progress;
+            mProgress = mInvertScrollDirection? -progress : progress;
             invalidate();
+            if (mOnPanoramaScrollListener != null) {
+                mOnPanoramaScrollListener.onScrolled(this, -mProgress);
+            }
         }
     }
 
@@ -105,9 +110,6 @@ public class PanoramaImageView extends ImageView {
         // Draw image
         if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
             float currentOffsetX = mMaxOffsetX * mProgress;
-            if (mInvertScrollDirection) {
-                currentOffsetX = -currentOffsetX;
-            }
             canvas.save();
             canvas.translate(currentOffsetX, 0);
             super.onDraw(canvas);
@@ -121,9 +123,7 @@ public class PanoramaImageView extends ImageView {
 
             float barBgStartX = mWidth/2 - barBgWidth/2;
             float barBgEndX = barBgStartX + barBgWidth;
-            float barStartX = mInvertScrollDirection ?
-                    barBgStartX + (barBgWidth-barWidth)/2 * (1 + mProgress):
-                    barBgStartX + (barBgWidth-barWidth)/2 * (1 - mProgress);
+            float barStartX = barBgStartX + (barBgWidth-barWidth)/2 * (1 - mProgress);
             float barEndX = barStartX + barWidth;
             float barY = mHeight * 0.9f;
 
@@ -177,5 +177,25 @@ public class PanoramaImageView extends ImageView {
          * Do nothing because PanoramaImageView only
          * supports {@link scaleType.CENTER_CROP}
          */
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when the image is scrolling
+     */
+    public interface OnPanoramaScrollListener {
+        /**
+         * Call when the image is scrolling
+         *
+         * @param view the panoramaImageView shows the image
+         *
+         * @param offsetProgress value between (-1, 1) indicating the offset progress.
+         *                 -1 means the image scrolls to show its left bound,
+         *                 1 means the image scrolls to show its right bound.
+         */
+        void onScrolled(PanoramaImageView view, float offsetProgress);
+    }
+
+    public void setOnPanoramaScrollListener(OnPanoramaScrollListener listener) {
+        mOnPanoramaScrollListener = listener;
     }
 }
