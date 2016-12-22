@@ -2,11 +2,12 @@ package com.gjiazhe.panoramaimageview.sample;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 
 import com.gjiazhe.panoramaimageview.GyroscopeObserver;
 import com.gjiazhe.panoramaimageview.PanoramaImageView;
@@ -14,17 +15,17 @@ import com.gjiazhe.panoramaimageview.PanoramaImageView;
 public class RecyclerViewSampleActivity extends AppCompatActivity {
 
     private GyroscopeObserver gyroscopeObserver;
-    private ListView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_sample);
+        setContentView(R.layout.activity_recyclerview_sample);
 
         gyroscopeObserver = new GyroscopeObserver();
 
-        listView = (ListView) findViewById(R.id.list_view);
-        listView.setAdapter(new MyAdapter());
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(new MyAdapter());
     }
 
     @Override
@@ -39,43 +40,37 @@ public class RecyclerViewSampleActivity extends AppCompatActivity {
         gyroscopeObserver.unregister();
     }
 
-    private class MyAdapter extends BaseAdapter {
+    private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
         @Override
-        public int getCount() {
-            return 3;
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            View view = inflater.inflate(R.layout.item_sample, parent, false);
+            return new MyViewHolder(view);
         }
 
         @Override
-        public Object getItem(int position) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(RecyclerViewSampleActivity.this).inflate(R.layout.item_list_sample, null);
-                holder = new ViewHolder();
-                holder.panoramaImageView = (PanoramaImageView) convertView.findViewById(R.id.panorama_image_view);
-                holder.panoramaImageView.setGyroscopeObserver(gyroscopeObserver);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
+        public void onBindViewHolder(final MyViewHolder holder, int position) {
+            switch (position % 3) {
+                case 0 : holder.panoramaImageView.setImageResource(R.drawable.horizontal1); break;
+                case 1 : holder.panoramaImageView.setImageResource(R.drawable.horizontal2); break;
+                case 2 : holder.panoramaImageView.setImageResource(R.drawable.horizontal3); break;
             }
+        }
 
+        @Override
+        public int getItemCount() {
+            return 6;
+        }
 
-//            holder.panoramaImageView.setImageDrawable();
-            return convertView;
+        class MyViewHolder extends RecyclerView.ViewHolder {
+            PanoramaImageView panoramaImageView;
+            MyViewHolder(View itemView) {
+                super(itemView);
+                panoramaImageView = (PanoramaImageView) itemView.findViewById(R.id.panorama_image_view);
+                panoramaImageView.setGyroscopeObserver(gyroscopeObserver);
+            }
         }
     }
 
-    private class ViewHolder {
-        public PanoramaImageView panoramaImageView;
-    }
 }

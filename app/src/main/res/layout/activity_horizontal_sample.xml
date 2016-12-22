@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.gjiazhe.panoramaimageview.sample.VerticalSampleActivity">
+    tools:context="com.gjiazhe.panoramaimageview.sample.HorizontalSampleActivity">
 
     <com.gjiazhe.panoramaimageview.PanoramaImageView
         android:id="@+id/panorama_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/vertical1" />
+        android:src="@drawable/horizontal2" />
 </RelativeLayout>

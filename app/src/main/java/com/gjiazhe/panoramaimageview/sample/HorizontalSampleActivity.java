@@ -6,14 +6,14 @@ import android.os.Bundle;
 import com.gjiazhe.panoramaimageview.GyroscopeObserver;
 import com.gjiazhe.panoramaimageview.PanoramaImageView;
 
-public class VerticalSampleActivity extends AppCompatActivity {
+public class HorizontalSampleActivity extends AppCompatActivity {
 
     private GyroscopeObserver gyroscopeObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_vertical_sample);
+        setContentView(R.layout.activity_horizontal_sample);
 
         gyroscopeObserver = new GyroscopeObserver();
 
