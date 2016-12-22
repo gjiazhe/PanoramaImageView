@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.widget.ImageView;
 
@@ -15,10 +16,16 @@ import android.widget.ImageView;
 
 public class PanoramaImageView extends ImageView {
 
+    // Image's scroll orientation
+    public final static byte ORIENTATION_NONE = -1;
+    public final static byte ORIENTATION_HORIZONTAL = 0;
+    public final static byte ORIENTATION_VERTICAL = 1;
+    private byte mOrientation = ORIENTATION_NONE;
+
     // Enable panorama effect or not
     private boolean mEnablePanoramaMode = true;
 
-    // If true, the image scroll left when the device clockwise rotate along y-axis.
+    // If true, the image scroll left(top) when the device clockwise rotate along y-axis(x-axis).
     private boolean mInvertScrollDirection = true;
 
     // Image's width and height
@@ -29,8 +36,8 @@ public class PanoramaImageView extends ImageView {
     private int mWidth;
     private int mHeight;
 
-    // Image's offset along x-axis from initial state(center in the view).
-    private float mMaxOffsetX;
+    // Image's offset from initial state(center in the view).
+    private float mMaxOffset;
 
     // The scroll progress.
     private float mProgress;
@@ -65,7 +72,7 @@ public class PanoramaImageView extends ImageView {
     public void initScrollbarPaint() {
         mScrollbarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mScrollbarPaint.setColor(Color.WHITE);
-        mScrollbarPaint.setStrokeWidth(dp2px(1));
+        mScrollbarPaint.setStrokeWidth(dp2px(1.5f));
     }
 
     public void setGyroscopeObserver(GyroscopeObserver observer) {
@@ -81,6 +88,7 @@ public class PanoramaImageView extends ImageView {
             if (mOnPanoramaScrollListener != null) {
                 mOnPanoramaScrollListener.onScrolled(this, -mProgress);
             }
+            Log.d("pro", progress+"");
         }
     }
 
@@ -95,8 +103,15 @@ public class PanoramaImageView extends ImageView {
             mDrawableWidth = getDrawable().getIntrinsicWidth();
             mDrawableHeight = getDrawable().getIntrinsicHeight();
 
-            float imgScale = (float) mHeight / (float) mDrawableHeight;
-            mMaxOffsetX = Math.abs((mDrawableWidth * imgScale - mWidth) * 0.5f);
+            if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
+                mOrientation = ORIENTATION_HORIZONTAL;
+                float imgScale = (float) mHeight / (float) mDrawableHeight;
+                mMaxOffset = Math.abs((mDrawableWidth * imgScale - mWidth) * 0.5f);
+            } else if(mDrawableWidth * mHeight < mDrawableHeight * mWidth) {
+                mOrientation = ORIENTATION_VERTICAL;
+                float imgScale = (float) mWidth / (float) mDrawableWidth;
+                mMaxOffset = Math.abs((mDrawableHeight * imgScale - mHeight) * 0.5f);
+            }
         }
     }
 
@@ -108,33 +123,60 @@ public class PanoramaImageView extends ImageView {
         }
 
         // Draw image
-        if (mDrawableWidth * mHeight > mDrawableHeight * mWidth) {
-            float currentOffsetX = mMaxOffsetX * mProgress;
+        if (mOrientation == ORIENTATION_HORIZONTAL) {
+            float currentOffsetX = mMaxOffset * mProgress;
             canvas.save();
             canvas.translate(currentOffsetX, 0);
+            super.onDraw(canvas);
+            canvas.restore();
+        } else if (mOrientation == ORIENTATION_VERTICAL) {
+            float currentOffsetY = mMaxOffset * mProgress;
+            canvas.save();
+            canvas.translate(0, currentOffsetY);
             super.onDraw(canvas);
             canvas.restore();
         }
 
         // Draw scrollbar
         if (mEnableScrollbar) {
-            float barBgWidth = mWidth * 0.9f;
-            float barWidth = barBgWidth * mWidth / mDrawableWidth;
+            switch (mOrientation) {
+                case ORIENTATION_HORIZONTAL: {
+                    float barBgWidth = mWidth * 0.9f;
+                    float barWidth = barBgWidth * mWidth / mDrawableWidth;
 
-            float barBgStartX = mWidth/2 - barBgWidth/2;
-            float barBgEndX = barBgStartX + barBgWidth;
-            float barStartX = barBgStartX + (barBgWidth-barWidth)/2 * (1 - mProgress);
-            float barEndX = barStartX + barWidth;
-            float barY = mHeight * 0.9f;
+                    float barBgStartX = (mWidth - barBgWidth) / 2;
+                    float barBgEndX = barBgStartX + barBgWidth;
+                    float barStartX = barBgStartX + (barBgWidth - barWidth) / 2 * (1 - mProgress);
+                    float barEndX = barStartX + barWidth;
+                    float barY = mHeight * 0.9f;
 
-            mScrollbarPaint.setAlpha(100);
-            canvas.drawLine(barBgStartX, barY, barBgEndX, barY, mScrollbarPaint);
-            mScrollbarPaint.setAlpha(255);
-            canvas.drawLine(barStartX, barY, barEndX, barY, mScrollbarPaint);
+                    mScrollbarPaint.setAlpha(100);
+                    canvas.drawLine(barBgStartX, barY, barBgEndX, barY, mScrollbarPaint);
+                    mScrollbarPaint.setAlpha(255);
+                    canvas.drawLine(barStartX, barY, barEndX, barY, mScrollbarPaint);
+                    break;
+                }
+                case ORIENTATION_VERTICAL: {
+                    float barBgHeight = mHeight * 0.9f;
+                    float barHeight = barBgHeight * mHeight / mDrawableHeight;
+
+                    float barBgStartY = (mHeight - barBgHeight) / 2;
+                    float barBgEndY = barBgStartY + barBgHeight;
+                    float barStartY = barBgStartY + (barBgHeight - barHeight) / 2 * (1 - mProgress);
+                    float barEndY = barStartY + barHeight;
+                    float barX = mWidth * 0.95f;
+
+                    mScrollbarPaint.setAlpha(100);
+                    canvas.drawLine(barX, barBgStartY, barX, barBgEndY, mScrollbarPaint);
+                    mScrollbarPaint.setAlpha(255);
+                    canvas.drawLine(barX, barStartY, barX, barEndY, mScrollbarPaint);
+                    break;
+                }
+            }
         }
     }
 
-    private float dp2px(int dp) {
+    private float dp2px(float dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, Resources.getSystem().getDisplayMetrics());
     }
 
@@ -171,6 +213,10 @@ public class PanoramaImageView extends ImageView {
         return mEnableScrollbar;
     }
 
+    public byte getOrientation() {
+        return mOrientation;
+    }
+
     @Override
     public void setScaleType(ScaleType scaleType) {
         /**
@@ -189,8 +235,8 @@ public class PanoramaImageView extends ImageView {
          * @param view the panoramaImageView shows the image
          *
          * @param offsetProgress value between (-1, 1) indicating the offset progress.
-         *                 -1 means the image scrolls to show its left bound,
-         *                 1 means the image scrolls to show its right bound.
+         *                 -1 means the image scrolls to show its left(top) bound,
+         *                 1 means the image scrolls to show its right(bottom) bound.
          */
         void onScrolled(PanoramaImageView view, float offsetProgress);
     }

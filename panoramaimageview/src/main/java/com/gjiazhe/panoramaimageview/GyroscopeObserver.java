@@ -24,8 +24,11 @@ public class GyroscopeObserver implements SensorEventListener {
     // The radian the device already rotate along y-axis.
     private double mRotateRadianY;
 
-    // The maximum radian that the device can rotate clockwise and anticlockwise along y-axis.
-    // The value must between 0 and π/2.
+    // The radian the device already rotate along x-axis.
+    private double mRotateRadianX;
+
+    // The maximum radian that the device can rotate along x-axis and y-axis.
+    // The value must between (0, π/2].
     private double mMaxRotateRadian = Math.PI/9;
 
     // The PanoramaImageViews to be notified when the device rotate.
@@ -39,7 +42,7 @@ public class GyroscopeObserver implements SensorEventListener {
         mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         mLastTimestamp = 0;
-        mRotateRadianY = 0;
+        mRotateRadianY = mRotateRadianX = 0;
     }
 
     public void unregister() {
@@ -75,8 +78,22 @@ public class GyroscopeObserver implements SensorEventListener {
                 mRotateRadianY = -mMaxRotateRadian;
             } else {
                 for (PanoramaImageView view: mViews) {
-                    if (view != null) {
+                    if (view != null && view.getOrientation() == PanoramaImageView.ORIENTATION_HORIZONTAL) {
                         view.updateProgress((float) (mRotateRadianY / mMaxRotateRadian));
+                    }
+                }
+            }
+        } else if (rotateX > rotateY + rotateZ) {
+            final float dT = (event.timestamp - mLastTimestamp) * NS2S;
+            mRotateRadianX += event.values[0] * dT;
+            if (mRotateRadianX > mMaxRotateRadian) {
+                mRotateRadianX = mMaxRotateRadian;
+            } else if (mRotateRadianX < -mMaxRotateRadian) {
+                mRotateRadianX = -mMaxRotateRadian;
+            } else {
+                for (PanoramaImageView view: mViews) {
+                    if (view != null && view.getOrientation() == PanoramaImageView.ORIENTATION_VERTICAL) {
+                        view.updateProgress((float) (mRotateRadianX / mMaxRotateRadian));
                     }
                 }
             }
