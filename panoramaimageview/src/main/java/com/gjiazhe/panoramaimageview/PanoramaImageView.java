@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -118,9 +119,11 @@ public class PanoramaImageView extends ImageView {
             float barBgWidth = mWidth * 0.9f;
             float barWidth = barBgWidth * mWidth / mDrawableWidth;
 
-            float barBgStartX =  mWidth/2 - barBgWidth/2;
+            float barBgStartX = mWidth/2 - barBgWidth/2;
             float barBgEndX = barBgStartX + barBgWidth;
-            float barStartX = barBgStartX +  + (barBgWidth-barWidth)/2 * (1 - mProgress);
+            float barStartX = mInvertScrollDirection ?
+                    barBgStartX + (barBgWidth-barWidth)/2 * (1 + mProgress):
+                    barBgStartX + (barBgWidth-barWidth)/2 * (1 - mProgress);
             float barEndX = barStartX + barWidth;
             float barY = mHeight * 0.9f;
 
