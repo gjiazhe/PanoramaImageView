@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 25
@@ -21,4 +22,13 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:25.1.0'
+}
+
+publish {
+    userOrg = 'gjiazhe'
+    groupId = 'com.gjiazhe'
+    artifactId = 'PanoramaImageView'
+    publishVersion = '1.0'
+    desc = ''
+    website = 'https://github.com/gjiazhe/PanoramaImageView'
 }
