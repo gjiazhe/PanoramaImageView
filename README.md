@@ -5,12 +5,8 @@ An imageView can auto scroll with device rotating.
 ## ScreenShots
 
 <img src="screenshots/horizontal_sample.gif" width="270">
-
 <img src="screenshots/vertical_sample.gif" width="270">
-
 <img src="screenshots/recyclerview_sample.gif" width="270">
-
-
 
 ## Include PanoramaImageView to Your Project
 
