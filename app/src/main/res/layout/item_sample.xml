@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="210dp"
-    android:padding="3dp"
-    android:background="@android:color/black">
+    android:layout_height="210dp">
     <com.gjiazhe.panoramaimageview.PanoramaImageView
         android:id="@+id/panorama_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:piv_show_scrollbar="false"/>
+        android:padding="3dp"
+        app:piv_show_scrollbar="false"
+        android:background="@android:color/black"/>
 </LinearLayout>

@@ -74,7 +74,7 @@ public class PanoramaImageView extends ImageView {
         }
     }
 
-    public void initScrollbarPaint() {
+    private void initScrollbarPaint() {
         mScrollbarPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mScrollbarPaint.setColor(Color.WHITE);
         mScrollbarPaint.setStrokeWidth(dp2px(1.5f));
