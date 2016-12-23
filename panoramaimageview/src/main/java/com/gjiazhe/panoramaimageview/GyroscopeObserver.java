@@ -26,8 +26,7 @@ public class GyroscopeObserver implements SensorEventListener {
 
     // The radian the device already rotate along x-axis.
     private double mRotateRadianX;
-
-    // The maximum radian that the device can rotate along x-axis and y-axis.
+    // The maximum radian that the device should rotate along x-axis and y-axis to show image's bounds
     // The value must between (0, π/2].
     private double mMaxRotateRadian = Math.PI/9;
 
