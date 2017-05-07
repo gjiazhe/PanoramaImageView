@@ -3,33 +3,33 @@ package com.gjiazhe.panoramaimageview.sample;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import com.gjiazhe.panoramaimageview.GyroscopeObserver;
 import com.gjiazhe.panoramaimageview.PanoramaImageView;
+import com.gjiazhe.panoramaimageview.SensorObserver;
 
 public class HorizontalSampleActivity extends AppCompatActivity {
 
-    private GyroscopeObserver gyroscopeObserver;
+    private SensorObserver sensorObserver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_horizontal_sample);
 
-        gyroscopeObserver = new GyroscopeObserver();
+        sensorObserver = new SensorObserver();
 
         PanoramaImageView panoramaImageView = (PanoramaImageView) findViewById(R.id.panorama_image_view);
-        panoramaImageView.setGyroscopeObserver(gyroscopeObserver);
+        panoramaImageView.setSensorObserver(sensorObserver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        gyroscopeObserver.register(this);
+        sensorObserver.register(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        gyroscopeObserver.unregister();
+        sensorObserver.unregister();
     }
 }
