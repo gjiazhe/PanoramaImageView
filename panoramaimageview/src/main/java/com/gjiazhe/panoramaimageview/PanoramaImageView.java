@@ -80,7 +80,7 @@ public class PanoramaImageView extends ImageView {
         mScrollbarPaint.setStrokeWidth(dp2px(1.5f));
     }
 
-    public void setGyroscopeObserver(GyroscopeObserver observer) {
+    public void setSensorObserver(SensorObserver observer) {
         if (observer != null) {
             observer.addPanoramaImageView(this);
         }
