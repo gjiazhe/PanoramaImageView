@@ -1,5 +1,6 @@
 package com.gjiazhe.panoramaimageview.sample;
 
+import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,19 +9,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.gjiazhe.panoramaimageview.GyroscopeObserver;
+
 import com.gjiazhe.panoramaimageview.PanoramaImageView;
+import com.gjiazhe.panoramaimageview.SensorObserver;
 
 public class RecyclerViewSampleActivity extends AppCompatActivity {
 
-    private GyroscopeObserver gyroscopeObserver;
+    private SensorObserver sensorObserver;
+    private PackageManager PM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recyclerview_sample);
 
-        gyroscopeObserver = new GyroscopeObserver();
+        sensorObserver = new SensorObserver();
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -30,13 +33,13 @@ public class RecyclerViewSampleActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        gyroscopeObserver.register(this);
+        sensorObserver.register(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        gyroscopeObserver.unregister();
+        sensorObserver.unregister();
     }
 
     private class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
@@ -67,7 +70,7 @@ public class RecyclerViewSampleActivity extends AppCompatActivity {
             MyViewHolder(View itemView) {
                 super(itemView);
                 panoramaImageView = (PanoramaImageView) itemView.findViewById(R.id.panorama_image_view);
-                panoramaImageView.setGyroscopeObserver(gyroscopeObserver);
+                panoramaImageView.setSensorObserver(sensorObserver);
             }
         }
     }
